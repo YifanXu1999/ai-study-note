@@ -23,13 +23,13 @@ $$
 Let $g^m_t$ denote the exponential moving average of the gradient at time $t$.
 $$
 \begin{align*}
-E[m_t] & \approx E[g_t] (1-\beta_1) \sum_{i=1}^{t} \beta_1^{t-i} \\
+E[m_t] & \approx E[g^m_t] (1-\beta_1) \sum_{i=1}^{t} \beta_1^{t-i} \\
 & \approx E[g^m_t] (1-\beta_1) (\frac{1-\beta_1^t}{1-\beta_1}) & \text{(Geometric Series)} \\ 
 & \approx E[g^m_t] (1-\beta_1^t)
 \end{align*}
 $$
 
-So, by dividing $m_t$ by $1-\beta_1^t$, we can get the unbiased estimate of the first moment $\hat{m_t} = E[g^m_t]$.
+So, by dividing $m_t$ by $1-\beta_1^t$, we can get the unbiased estimate of the first moment $E[\hat{m_t}] \approx E[g^m_t]$.
 
 **Second Moment:**
 
@@ -48,7 +48,7 @@ E[v_t] & \approx E[(g^m_t)^2] (1-\beta_2) \sum_{i=1}^{t} \beta_2^{t-i} \\
 \end{align*}
 $$
 
-So, by dividing $v_t$ by $1-\beta_2^t$, we can get the unbiased estimate of the second moment $\hat{v_t} \approx E[(g^m_t)^2]$.
+So, by dividing $v_t$ by $1-\beta_2^t$, we can get the unbiased estimate of the second moment $E[\hat{v_t}] \approx E[(g^m_t)^2]$.
 
 **Why $\frac{\hat{m_t}}{\sqrt{\hat{v_t}}}$ works?**
 

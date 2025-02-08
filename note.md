@@ -9,8 +9,8 @@ To distinguish between them, we can look at the Taylor series expansion around a
 
 $$
 \begin{align*}
-f(x) &= f(x_0) + \nabla f(x_0)^T(x-x_0) + \frac{1}{2}(x-x_0)^T H(x_0)(x-x_0) + O(\|x-x_0\|^3) \\
-&= f(x_0) + \frac{1}{2}(x-x_0)^T H(x_0)(x-x_0) + O(\|x-x_0\|^3)
+f(x) &\approx f(x_0) + \nabla f(x_0)^T(x-x_0) + \frac{1}{2}(x-x_0)^T H(x_0)(x-x_0)  \\
+&\approx f(x_0) + \frac{1}{2}(x-x_0)^T H(x_0)(x-x_0) 
 \end{align*}
 $$
 
@@ -29,6 +29,8 @@ where H(x_0) is the Hessian matrix at x_0. At a critical point:
 - Calculation Speed Per Batch: Due to the advancement of matrix parallelization, the training speed per batch is almost the same for small and large batch. The performance difference would become noticiable when the batch size became too large.
 - Training Speed Per Epoch: Because larger batch size calculation can be almost as fast as small batch, the training speed per epoch depeding how many updates needed to be performed per batch. Thus, larger batch size has a faster training speed per epoch.
 - Convergence: Small batch in general has a better convergence. Due to the noise in the gradient, small batch has a higher variance in the gradient. It is less likely to get stuck in a local&sharp minimum.
+
+### Normalization
 
 ## Momentum
 
@@ -56,9 +58,9 @@ $$
 Why need adaptive learning rate?
 
 - (Need for Gradually Decreased Learning Rate) At the final stage of training, we might not need the learning rate to be as large as the initial stage. Because a plausible trajectory of training of loss function goes like at the initial stage, we want the parameters to explore the space more. Thus, parameters need to have a larger learning rate to jump from one area to another. However, at the final stage, most parameters are likely to be stuck at a area such that they are unlikely to get out with more iterations of training. Thus, we want them to converge to the local minima. And for this case, smaller learning rate is preferred to get the result more accurate.
-- (Different Learning Rate for Different Parameters) Different parameters have different gradients. For parameters with large gradient, they are likely do not need large learning rate to get out of the local minima. However, for parameters with small gradient, they are likely to get stuck at the local minima. Thus, we want to have a smaller learning rate for them.
+- (Different Learning Rate for Different Parameters) Different parameters have different gradients. For example, parameters with large gradient, they are likely do not need large learning rate to get out of the local minima. Instead, a large learning rate might lead to overshoot and oscillation. 
 
-Thus, we want to introduce a learning rate hyper parameter for calibration. And turn the parameter update into:
+Thus, we want to introduce a learning rate hyper parameter for adaptive adjustment. And turn the parameter update into:
 
 $$
 \theta^{t+1} = \theta^t - \frac{\eta }{\sigma^t} g^t
@@ -128,7 +130,7 @@ f'''(a) &= 6c_3 \\
 $$
 
 
-Thus, we can get the coefficients of the polynomial by the derivatives at $x = a$, which are:
+Thus, we can get the coefficients of the polynomial by the derivatives at $x = a$. And the function can be rewritten as:
 
 $$
 \begin{align*}
@@ -220,7 +222,7 @@ $$
 
 **Why tanh is (slightly) better than sigmoid:**
 
-Based on the derivative, we can see that tanh has a steeper gradient around 0, which means it converges faster. The range of tanh derivative is also larger than sigmoid ([0, 1] vs [0, 0.25]), which has 4 times more gradient at the zero point. Despite the worse gradient variance, tanh is still better than sigmoid due to its larger range of gradient in most cases.
+Based on the derivative, we can see that tanh has a steeper gradient around 0, and the range of tanh derivative is larger than sigmoid ([0, 1] vs [0, 0.25]). Despite it has a worse gradient vanishing problem, tanh is still better than sigmoid for most cases.
 
 **Issue of sigmoid and tanh:**
 
