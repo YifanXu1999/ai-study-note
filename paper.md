@@ -22,6 +22,7 @@ m_t &= \beta_1 m_{t-1} + (1-\beta_1) g_t \\
 $$
 
 Let $l = (1-\beta_1)\sum_{i=0}^{t} \beta_1^{t-i} ( g_i - g_t)$, then
+
 $$
 \begin{align*}
 E[m_t] & = E[g_t] (1-\beta_1) \sum_{i=0}^{t} \beta_1^{t-i} + l\\
