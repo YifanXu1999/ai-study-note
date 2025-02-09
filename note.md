@@ -10,18 +10,17 @@ Softmax function $\frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ is a function generall
 
 Derivative:
 
-Let $\hat{y}_i = \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ 
+Let $\hat{y_i} = \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ 
 
 $$
 \begin{align*}
-\frac{\partial}{\partial z_j} \hat{y}_i &= \frac{\partial}{\partial z_j} \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}} \\
+\frac{\partial}{\partial z_j} \hat{y_i} &= \frac{\partial}{\partial z_j} \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}} \\
 &= \frac{ \frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l} - e^{z_i} \cdot \frac{\partial}{\partial z_j} \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
 &= \frac{\frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
-&= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
-&= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \hat{y}_i \hat{y}_j \\
+&= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \hat{y_i} \hat{y_j} \\
 &= \begin{cases} 
-\hat{y}_i(1-\hat{y}_i) & \text{if } i=j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = e^{z_i} \text{ and }  \frac{e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} = \hat{y}_i\\
--\hat{y}_i\hat{y}_j & \text{if } i \neq j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = 0
+\hat{y_i}(1-\hat{y_i}) & \text{if } i=j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = e^{z_i} \text{ and }  \frac{e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} = \hat{y_i}\\
+-\hat{y_i}\hat{y_j} & \text{if } i \neq j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = 0
 \end{cases}
 \end{align*}
 $$
@@ -33,14 +32,14 @@ To understand why cross entropy is a good loss function for classification probl
 
 $$
 \begin{align*}
-L &= -\sum_{i=1}^{n} y_i \log(\hat{y}_i) \\
+L &= -\sum_{i=1}^{n} y_i \log(\hat{y_i}) \\
 \end{align*}
 $$
 
 Take the derivative of the loss function with respect to the logits $z_i$:
 $$
 \begin{align*}
-\frac{\partial L}{\partial \hat{y_i}} &= \frac{\partial}{\partial \hat{y_i}} (-\sum_{i=1}^{n} y_i \log(\hat{y}_i)) \\
+\frac{\partial L}{\partial \hat{y_i}} &= \frac{\partial}{\partial \hat{y_i}} (-\sum_{i=1}^{n} y_i \log(\hat{y_i})) \\
 &= -\frac{y_i}{\hat{y_i}}
 \end{align*}
 $$
@@ -51,16 +50,16 @@ Combine the result with the softmax function, we get:
 
 $$
 \begin{align*}
-\frac{\partial L}{\partial \hat{y}_i} \cdot \frac{\partial \hat{y}_i}{\partial z_j} = \begin{cases} 
+\frac{\partial L}{\partial \hat{y_i}} \cdot \frac{\partial \hat{y_i}}{\partial z_j} = \begin{cases} 
 y_i(\hat{y_j} - 1) & \text{if } i=j  \\
-y_i\hat{y}_j & \text{if } i \not=j  \\
+y_i\hat{y_j} & \text{if } i \not=j  \\
 \end{cases}
 \end{align*}
 $$
 
 $$
 \begin{align*}
-\frac{\partial L}{\partial z_j} &= \sum_{i=1}^{n} \frac{\partial L}{\partial \hat{y}_i} \cdot \frac{\partial \hat{y}_i}{\partial z_j} \\
+\frac{\partial L}{\partial z_j} &= \sum_{i=1}^{n} \frac{\partial L}{\partial \hat{y_i}} \cdot \frac{\partial \hat{y_i}}{\partial z_j} \\
 &= \sum_{i=1, i\not=j}^{n} y_i(\hat{y_j})  +  (\hat{y_j} - 1)y_j  \\
 &= (\hat{y_i}) [(\sum_{i=1}^{n} y_i) - y_j] +  (\hat{y_j}y_j - y_j)  \\
 &= \hat{y_j}(1- y_j) +  (\hat{y_j}y_j - y_j) &\text{ because } \sum_{i=1}^{n} y_i = 1 \\
