@@ -1,3 +1,80 @@
+# Supervised Learning
+
+## Classification
+
+Classification is a type of supervised learning where the goal is to predict a categorical label for a given input.
+
+### Softmax Function and Cross Entropy Loss
+
+Softmax function $\frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ is a function generally used in the final layer of a classification model. It takes the logits at the final layer and normalizes them to a probability distribution.
+
+Derivative:
+
+Let $\hat{y}_i = \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$
+
+$$
+\begin{align*}
+\frac{\partial}{\partial z_j} \hat{y}_i &= \frac{\partial}{\partial z_j} \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}} \\
+&= \frac{ \frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l} - e^{z_i} \cdot \frac{\partial}{\partial z_j} \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
+& = \frac{\frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
+& = \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
+&= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \hat{y}_i \hat{y}_j \\
+& = \begin{cases} 
+\hat{y}_i(1-\hat{y}_i) & \text{if } i=j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = e^{z_i} \text{ and }  \frac{e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} = \hat{y}_i\\
+-\hat{y}_i\hat{y}_j & \text{if } i \neq j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = 0
+\end{cases}
+\end{align*}
+$$
+
+
+#### Why Cross Entropy as loss function for classification problem?
+
+To understand why cross entropy is a good loss function for classification problem, we need to understand how it works with the softmax function.
+
+$$
+\begin{align*}
+L &= -\sum_{i=1}^{n} y_i \log(\hat{y}_i) \\
+\end{align*}
+$$
+
+Take the derivative of the loss function with respect to the logits $z_i$:
+$$
+\begin{align*}
+\frac{\partial L}{\partial \hat{y_i}} &= \frac{\partial}{\partial \hat{y_i}} (-\sum_{i=1}^{n} y_i \log(\hat{y}_i)) \\
+&= -\frac{y_i}{\hat{y_i}}
+\end{align*}
+$$
+
+
+
+Combine the result with the softmax function, we get:
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial \hat{y}_i} \cdot \frac{\partial \hat{y}_i}{\partial z_j} = \begin{cases} 
+y_i(\hat{y_j} - 1) & \text{if } i=j  \\
+y_i\hat{y}_j & \text{if } i \not=j  \\
+\end{cases}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial z_j} &= \sum_{i=1}^{n} \frac{\partial L}{\partial \hat{y}_i} \cdot \frac{\partial \hat{y}_i}{\partial z_j} \\
+&= \sum_{i=1, i\not=j}^{n} y_i(\hat{y_j})  +  (\hat{y_j} - 1)y_j  \\
+&= (\hat{y_i}) [(\sum_{i=1}^{n} y_i) - y_j] +  (\hat{y_j}y_j - y_j)  \\
+&= \hat{y_j}(1- y_j) +  (\hat{y_j}y_j - y_j) &\text{ because } \sum_{i=1}^{n} y_i = 1 \\
+&= \hat{y_j} - y_j
+\end{align*}
+$$
+
+As we can see, the gradient of the loss function with respect to the logits is numerically stable and easy to compute. 
+
+
+
+
+
+
 
 # Optimization
 
@@ -88,6 +165,8 @@ $$
 
 ### Learning Rate Scheduling
 
+
+# Logistis Function
 
 
 
@@ -248,7 +327,6 @@ f(x) = \max(0, x)
 \end{align*}
 \\
 $$
-
 
 
 
