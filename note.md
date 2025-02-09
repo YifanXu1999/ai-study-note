@@ -37,6 +37,7 @@ L &= -\sum_{i=1}^{n} y_i \log(\hat{y_i}) \\
 $$
 
 Take the derivative of the loss function with respect to the logits $z_i$:
+
 $$
 \begin{align*}
 \frac{\partial L}{\partial \hat{y_i}} &= \frac{\partial}{\partial \hat{y_i}} (-\sum_{i=1}^{n} y_i \log(\hat{y_i})) \\
