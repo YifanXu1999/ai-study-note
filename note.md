@@ -10,16 +10,16 @@ Softmax function $\frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ is a function generall
 
 Derivative:
 
-Let $\hat{y}_i = \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$
+Let $\hat{y}_i = \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}}$ 
 
 $$
 \begin{align*}
 \frac{\partial}{\partial z_j} \hat{y}_i &= \frac{\partial}{\partial z_j} \frac{e^{z_i}}{\sum_{l=1}^{n} e^{z_l}} \\
 &= \frac{ \frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l} - e^{z_i} \cdot \frac{\partial}{\partial z_j} \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
-& = \frac{\frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
-& = \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
+&= \frac{\frac{\partial}{\partial z_j} e^{z_i} \cdot \sum_{l=1}^{n} e^{z_l}}{(\sum_{l=1}^{n} e^{z_l})^2} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
+&= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \frac{e^{z_i} \cdot e^{z_j}}{(\sum_{l=1}^{n} e^{z_l})^2} \\
 &= \frac{\frac{\partial}{\partial z_j} e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} - \hat{y}_i \hat{y}_j \\
-& = \begin{cases} 
+&= \begin{cases} 
 \hat{y}_i(1-\hat{y}_i) & \text{if } i=j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = e^{z_i} \text{ and }  \frac{e^{z_i}}{(\sum_{l=1}^{n} e^{z_l})} = \hat{y}_i\\
 -\hat{y}_i\hat{y}_j & \text{if } i \neq j \text{ because } \frac{\partial}{\partial z_j} e^{z_i} = 0
 \end{cases}
