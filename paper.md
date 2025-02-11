@@ -77,21 +77,21 @@ So, by dividing $v_t$ by $1-\beta_2^t$, we can get the unbiased estimate of the 
 
 ### Novelty:
 
-- It introduces a spatial module to the CNN to make it more robust to the spatial transformation.
-- The spatial transformer network (STN) is often used at the first layer to transform the input image to a canonical form, and then feed into the CNN.
-- Affine transformation is used to transform the input image.
+- It acts as a pre-processing step to the CNN to make it more robust to the spatial transformation.
+- The spatial transformer network (STN) is often used at the first layer of the network. It transforms the input image to a canonical form, and then feed into the CNN.
+- Affine transformation is used to transform the input image. And the transformation matrix is learned by the network.
 
 ### Architecture:
 
 The spatial transformer network (STN) consists of three parts:
 
 1. Localization Network:
-    - It is a convolutional network that outputs the parameters for the affine transformation matrix.
+    - It is a network (can be a CNN, FCN, RNN, etc.) that outputs the parameters for the affine transformation matrix.
 
 2. Grid Generator (Affine Transformation):
     - Apply the affine transformation to the input image.
 
-3. GridSampler:
+3. Grid Sampler:
     - It samples the input image using the grid of coordinates.
     - A common sampling method is bilinear interpolation.
 
@@ -99,7 +99,7 @@ The spatial transformer network (STN) consists of three parts:
 
 <img src="./assets/original-vs-stn.png" alt="image-20250211124206828" style="zoom:50%;" />
 
-Based on the above image, we can see that the STN is able to transform the input image to a "canonical form". In which, the images of the same digits are more aligned in terms of rotation. Thus, it can mitigate the problem of the CNN being sensitive to the spatial transformation like rotation and scaling.
+Based on the above image, we can see that the STN is able to transform the input image to a "canonical form". In which, the images of the same digits are more aligned in terms of rotation. We can conclude that STN helps to mitigate the problem of the CNN being sensitive to the spatial transformation like rotation.
 
 ### Code:
 
