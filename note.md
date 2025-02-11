@@ -166,9 +166,6 @@ $$
 ### Learning Rate Scheduling
 
 
-# Logistis Function
-
-
 
 # Math
 
@@ -221,6 +218,72 @@ $$
 # Neural Network
 
 ## Feed Forward Neural Network 
+
+## Convolutional Neural Network
+
+### Why not use feed forward neural network for image classification?
+
+- Suppose we have a 100x100 RGB image and we are using a fully connected layer. By flattening the image pixels, we get a input vector of 30000 features. Feeding it to a fully connected layer with 1000 neurons, the number of weights will be 30000 * 1000 = 30,000,000, which is **computationally expensive**. 
+
+- Not only that, for most trainings, the number of neurons of the first layer is often larger than the number of input features. Otherwise, the network is likely to be underfitting. However, if we set more than 30000 neurons for the first layer, it is likely to be overfitting.
+
+So, to train a image task with fully-connected layer architecture, it is facing the problem of **computationally expensiveness** and it is **prone to overfitting**.
+
+### Observation of Image
+
+- If we think neuron as a representation of a pattern of the image, it might not need the whole image for its computation. Distinct patterns can be captured at a smaller region of the image.
+- The same pattern might appear in different locations of the image.
+
+### Simplication of the Problem
+
+- Instead of flattening the image into a 1-D vector, we can use the concept of **receptive field** to capture the regional pattern of the image
+- We can share the weights of filters, so that the reception fields with similar patterns can receive similar values on the feature map.
+
+### Architecture of Convolutional Neural Network
+
+<img src="assets/kernel.png" alt="image-kernel" style="zoom:25%;" />
+
+- kernel: also called filter, a small matrix of weights to perform convolution opertion on the receptive field
+- stride: the number of pixels the kernel moves by
+- padding: the number of pixels added to the side of the image
+
+<img src="assets/feature-map.png" alt="image-feature_map" style="zoom:50%;" />
+
+- feature map: the result of applying a kernel to an image
+- channel: the number of feature maps
+
+
+
+**Estimate of the number of parameters in a convolutional layer:**
+
+
+Number of parameters = (Input channel) x (Output channel) x (Kernel size)
+
+Suppose we have a image size of 100x100, 3x3 kernel, 1 stride, 1 padding, 3 input channels, and 64 output channels,
+- Input channel = 3
+- Output channel = 64
+- Kernel size = 3 x 3 = 9
+
+
+Thus, the number of parameters is 3 x 64 x 9 = 1728, which is much less than the 100x100x3 = 30000 for a fully connected layer.
+
+**Pooling:**
+
+Pooling is a technique to reduce the spatial dimensions of the feature map.
+
+But the recent trend uses pooling less and less due to the redundancy of computation.
+
+
+### Limitation of Convolutional Neural Network
+
+- Convolutional Neural Network is not invariant to the scaling and rotation of the image.
+- We often use data augmentation to improve the performance of the model, but often it is not enough.
+
+
+## Recurrent Neural Network
+
+## Transformer
+
 
 
 # Activation Functions
