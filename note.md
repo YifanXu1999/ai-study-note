@@ -221,7 +221,7 @@ $$
 
 ## Convolutional Neural Network
 
-### Why not use feed forward neural network for image classification?
+### Why not use fully connected layer for image classification?
 
 - Suppose we have a 100x100 RGB image and we are using a fully connected layer. By flattening the image pixels, we get a input vector of 30000 features. Feeding it to a fully connected layer with 1000 neurons, the number of weights will be 30000 * 1000 = 30,000,000, which is **computationally expensive**. 
 
