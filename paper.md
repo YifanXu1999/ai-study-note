@@ -206,7 +206,7 @@ $$
 
 $$
 \begin{align*}
-V(D, G) & = \E_{x \sim p_{d}}[\log D(x)] + \E_{z \sim p_z}[\log (1 - D(G(z)))] \\
+V(D, G) & = E_{x \sim p_{d}}[\log D(x)] + E_{z \sim p_z}[\log (1 - D(G(z)))] \\
 & = \int_x p_{d}(x) \log D(x) dx + \int_z p_z(z) \log (1 - D(G(z))) dz\\
 & =\int_x p_{d}(x) \log D(x) dx + \int_x p_{g}(x) \log (1 - D(x)) dx\\
 & = \int_x (p_{d}(x) \log D(x) + p_{g}(x) \log (1 - D(x))) dx
@@ -223,10 +223,9 @@ Therefore, the optimal discriminator is $D^*(x) = \frac{p_{d}(x)}{p_{d}(x) + p_{
 
 $$
 \begin{align*}
-V(D^*, G) & = \E_{x \sim p_{d}}[\log D^*(x)] + \E_{z \sim p_z}[\log (1 - D^*(G(z)))] \\
- & = \E_{x \sim p_{d}}[\log D^*(x)] + \E_{x \sim p_g}[\log (1 - D^*(x))] \\
- & =  \E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + \E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})] \\
- & =  \E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + \E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})] \\
+V(D^*, G) & = E_{x \sim p_{d}}[\log D^*(x)] + E_{x \sim p_g}[\log (1 - D^*(x))] \\
+ & =  E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})] \\
+ & =  E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})] \\
  & = \int_x (p_{d}(x) \log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)}) + p_g(x) \log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})) dx
 \end{align*}
 $$
