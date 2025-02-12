@@ -230,7 +230,60 @@ V(D^*, G) & = E_{x \sim p_{d}}[\log D^*(x)] + E_{x \sim p_g}[\log (1 - D^*(x))] 
 \end{align*}
 $$
 
-**Blocked (Need to learn Lagrangian multiplier to solve the optimization problem)**
+Let $a_i \text{ and } b_i$ to denote the probability of $x_i$ being sampled from $p_{d}(x)$ and $p_g(x)$ respectively.
+
+We can rewrite the integral as the summation of the probabilities in the discrete case:
+
+$$
+ \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) + b_i \log (\frac{b_i}{a_i + b_i})]
+$$
+
+And we know that the summation of probability distribution function is 1. Then we get the following constraint:
+
+$$
+\sum_{i=1}^{n} a_i = 1 \quad \text{and} \quad \sum_{i=1}^{n} b_i = 1
+$$
+
+Then, we can formulate the Lagrangian multiplier function:
+
+$$
+
+L(a, b, \lambda, \mu) = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) + b_i \log (\frac{b_i}{a_i + b_i})] - \lambda ([\sum_{i=1}^{n} a_i] - 1 + [\sum_{i=1}^{n} b_i] - 1)\\
+\quad \quad \quad = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \lambda b_i] + 2\lambda 
+$$
+
+Let $F_i = a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \lambda b_i$.
+
+We want to have $\frac{\partial F_i}{\partial a_i} = 0 \quad \text{and} \quad \frac{\partial F_i}{\partial b_i} = 0$ for every $i$, to make sure $F$ is at the minimum.
+
+By taking the partial derivative of $F_i$ with respect to $a_i$ and $b_i$, we get:
+
+$$
+\frac{\partial F_i}{\partial a_i} = \log{\frac{a_i}{a_i+b_i}} - \lambda  = 0 \implies  \lambda = \log{\frac{a_i}{a_i+b_i}}
+$$
+
+$$
+\frac{\partial F_i}{\partial b_i} = \log{\frac{b_i}{a_i+b_i}} - \lambda  = 0 \implies  \lambda = \log{\frac{b_i}{a_i+b_i}}   
+$$
+
+Thus, we have $ \log{\frac{a_i}{a_i+b_i}} = \log{\frac{b_i}{a_i+b_i}} \implies a_i = b_i$.
+
+Therefore, if we have $a_i = b_i$ for all $x_i$, then the objective function $V(D^*, G^*)$ is minimized with value of $-2log2$
+
+
+
+
+$$
+
+$$
+
+$$
+
+
+
+
+
+
 
 
 
