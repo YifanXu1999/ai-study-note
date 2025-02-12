@@ -170,7 +170,8 @@ model = Net().to(device)
 ## Generative Adversarial Networks https://arxiv.org/pdf/1406.2661
 
 <img src="./assets/gan.png" alt="image-20250211124206828" style="zoom:50%;" />
-### Novelty:
+
+### Novelty
 
 - Adversarial Training Paradigm: Before GAN, the generative models often relied on the maximum likelihood estimation. GAN introduced a discrimitive network as the adversary to the generative network, which drives the generator to generate the samples that are close to the real samples.
 - Implicit density estimation: The generative model is not trained with the explicit density estimation. Instead, it is trained with purely the log-likelihood loss.
