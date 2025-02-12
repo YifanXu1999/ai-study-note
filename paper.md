@@ -248,11 +248,11 @@ Then, we can formulate the Lagrangian multiplier function:
 
 $$
 
-L(a, b, \lambda, \mu) = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) + b_i \log (\frac{b_i}{a_i + b_i})] - \lambda ([\sum_{i=1}^{n} a_i] - 1 + [\sum_{i=1}^{n} b_i] - 1)\\
-\quad \quad \quad = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \lambda b_i] + 2\lambda 
+L(a, b, \lambda, \mu) = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) + b_i \log (\frac{b_i}{a_i + b_i})] - \lambda ([\sum_{i=1}^{n} a_i] - 1) - \mu ([\sum_{i=1}^{n} b_i] - 1)\\
+\quad \quad \quad = \sum_{i=1}^{n} [a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \mu b_i] + \lambda + \mu
 $$
 
-Let $F_i = a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \lambda b_i$.
+Let $F_i = a_i \log(\frac{a_i}{a_i + b_i}) - \lambda a_i  + b_i \log (\frac{b_i}{a_i + b_i}) - \mu b_i$.
 
 We want to have $\frac{\partial F_i}{\partial a_i} = 0 \quad \text{and} \quad \frac{\partial F_i}{\partial b_i} = 0$ for every $i$, to make sure $F$ is at the minimum.
 
@@ -263,21 +263,20 @@ $$
 $$
 
 $$
-\frac{\partial F_i}{\partial b_i} = \log{\frac{b_i}{a_i+b_i}} - \lambda  = 0 \implies  \lambda = \log{\frac{b_i}{a_i+b_i}}   
+\frac{\partial F_i}{\partial b_i} = \log{\frac{b_i}{a_i+b_i}} - \mu  = 0 \implies  \mu = \log{\frac{b_i}{a_i+b_i}}   
 $$
+
+We then have $\frac{a_i}{a_i+b_i} = e^{\lambda} \quad \text{and} \quad \frac{b_i}{a_i+b_i} = e^{\mu}$,
+
+and $\frac{a_i}{a_i+b_i} + \frac{b_i}{a_i+b_i} = 1 = e^{\lambda} + e^{\mu} $.
+
+If we let $e^{\lambda} = e^{\mu} = \frac{1}{2}$, then we have $a_i = b_i$.
 
 Thus, we have $ \log{\frac{a_i}{a_i+b_i}} = \log{\frac{b_i}{a_i+b_i}} \implies a_i = b_i$.
 
 Therefore, if we have $a_i = b_i$ for all $x_i$, then the objective function $V(D^*, G^*)$ is minimized with value of $-2log2$
 
 
-
-
-$$
-
-$$
-
-$$
 
 
 
