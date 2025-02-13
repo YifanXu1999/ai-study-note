@@ -215,6 +215,45 @@ f(x) &= f(a) + f'(a)(x-a) + \frac{f''(a)}{2}(x-a)^2 + \frac{f'''(a)}{6}(x-a)^3 +
 $$
 
 
+## Multivariate Calculus
+
+### Gradient
+
+### Lagrange Multiplier
+
+
+
+
+# Statistics
+
+## Probability Distribution
+
+### Kullback-Leibler Divergence
+
+kl divergence is a measure of how one probability distribution diverges from another.
+
+$$
+D_{KL}(P || Q) = \int_x P(x) \log{\frac{P(x)}{Q(x)}} dx
+$$
+
+
+
+### Jensen-Shannon Divergence
+
+JS divergence is a symmetric measure of how one probability distribution diverges from another.
+
+$$
+D_{JS}(P || Q) = \frac{1}{2}D_{KL}(P || \frac{P+Q}{2}) + \frac{1}{2}D_{KL}(Q || \frac{P+Q}{2})
+$$
+
+
+
+
+
+
+
+
+
 # Neural Network
 
 ## Feed Forward Neural Network 
