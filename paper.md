@@ -276,9 +276,29 @@ Thus, we have $ \log{\frac{a_i}{a_i+b_i}} = \log{\frac{b_i}{a_i+b_i}} \implies a
 
 Therefore, if we have $a_i = b_i$ for all $x_i$, then the objective function $V(D^*, G^*)$ is minimized with value of $-2log2$
 
+## Findings of $V(D^*, G)$:
 
+$V(D^*, G) \text{ can also be written as } $
 
+- $-2log2 + KL(p_{d}(x) || \frac{p_{d}(x) + p_{g}(x)}{2}) + KL(p_{g}(x) || \frac{p_{d}(x) + p_{g}(x)}{2})$
 
+- $-2log2 + 2JS(p_{d}(x) || p_{g}(x))$
+
+This is because:
+
+$$
+\begin{align*}
+V(D^*, G)  &=  E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})]\\
+& =   E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{2*(p_{d}(x) + p_g(x))}) - \log2] + E_{x \sim p_{g}}[\log (\frac{p_g(x)}{2*(p_{d}(x) + p_g(x))}) - \log2]\\
+& =  -2log2 + E_{x \sim p_{d}}[\log(\frac{p_{d}(x)}{p_{d}(x) + p_g(x)})] + E_{x \sim p_{g}}[\log (\frac{p_g(x)}{p_{d}(x) + p_g(x)})]\\
+& =  -2log2 + KL(p_{d}(x) || \frac{p_{d}(x) + p_{g}(x)}{2}) + KL(p_{g}(x) || \frac{p_{d}(x) + p_{g}(x)}{2})\\
+& =  -2log2 + 2JS(p_{d}(x) || p_{g}(x))
+\end{align*}
+$$
+
+### Limitation of V(D*, G) as the loss function:
+
+Max value of JS divergence is always log2 when two distributions do not overlap. However, the differences between their centers might vary. For the two non-overlapping distributions with close centers, they are supposed to be similar, but the JS divergence is still log2. And this brings difficulty in the training of the generator.
 
 
 
