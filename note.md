@@ -247,6 +247,14 @@ D_{JS}(P || Q) = \frac{1}{2}D_{KL}(P || \frac{P+Q}{2}) + \frac{1}{2}D_{KL}(Q || 
 $$
 
 
+### Jensen's inequality
+
+$$
+\mathbb{E}[f(x)] \geq f(\mathbb{E}[x])
+$$
+
+
+
 
 
 

@@ -167,7 +167,7 @@ model = Net().to(device)
 
 # Generative Model
 
-## Generative Adversarial Networks https://arxiv.org/pdf/1406.2661
+## GAN: Generative Adversarial Networks https://arxiv.org/pdf/1406.2661
 
 <img src="./assets/gan.png" alt="image-20250211124206828" style="zoom:50%;" />
 
@@ -299,6 +299,95 @@ $$
 ### Limitation of V(D*, G) as the loss function:
 
 Max value of JS divergence is always log2 when two distributions do not overlap. However, the differences between their centers might vary. For the two non-overlapping distributions with close centers, they are supposed to be similar, but the JS divergence is still log2. And this brings difficulty in the training of the generator.
+
+
+
+## VAE: Auto-Encoding Variational Bayes https://arxiv.org/pdf/1312.6114
+<img src="./assets/vae.png" alt="image-20250211124206828" style="zoom:100%;" />
+
+### Novelty:
+
+- Implicit density estimation: The generative model is not trained with the explicit density estimation. Instead, it is trained with purely the log-likelihood loss.
+- Variational Inference: The VAE is a variational inference model. It is a type of generative model that uses the variational inference to approximate the posterior distribution of the latent variables.
+- Reparameterization Trick: The VAE uses the reparameterization trick (Normal Distribution) to sample the latent variables from the posterior distribution, which maintains the differentiable property of the model.
+
+### Architecture:
+
+**Components:**
+
+- $q_{\phi}(z|x)$: The trained encoder network. It takes the input $x$ and outputs the parameters of the posterior distribution of the latent variables $z$.
+- $p_{\theta}(z)$: The "true" prior distribution of the latent variables we want the trained encoder network match. In the paper, it is the standard normal distribution. And it means that we want the distrubution network $q_{\phi}(z|x)$ to get close to the standard normal distribution.
+- $p_{\theta}(x|z)$: The trained decoder network. It takes the latent variables $z$ and outputs the parameters of the generative distribution of the input $x$.
+
+
+**Objective:**
+
+$$
+\max_{\phi, \theta} \mathbb{E}_{z \sim p_{\phi}(z|x)}[\log p_{\theta}(x|z)] - \text{KL}(q_{\phi}(z|x) || p_{\theta}(z))
+$$
+
+**Intuition:**
+
+- The loss function is derived from the Evidence Lower Bound (ELBO) of the log-likelihood of the input $x$.
+- The first term is the reconstruction loss. It is the difference between the actual input $x$ and the generated output $\hat{x}$ by the decoder network.
+- The second term is the KL divergence between the posterior distribution $q_{\phi}(z|x)$ of the latent variables $z$ and the prior distribution $p_{\theta}(z)$. By minimizing the KL divergence, we can make the posterior distribution $q_{\phi}(z|x)$ of the latent variables $z$ close to the prior distribution $p_{\theta}(z)$, which is the standard normal distribution in the context of this paper.
+
+**Evidence Lower Bound (ELBO):**
+
+For any datapoint $x$, their likelihood function can be written as the marginal likelihood:
+
+$$
+\begin{align*}
+p(x) &= \int_{z} p(x,z) dz \\
+& = \int_{z} q(z|x) \frac{p(x,z)}{q(z|x)} dz \\
+& = \mathbb{E}_{z \sim q(z|x)}[\frac{p(x,z)}{q(z|x)}]
+\end{align*}
+$$
+
+By Jensen's inequality $\mathbb{E}[f(x)] \geq f(\mathbb{E}[x])$, we have:
+
+$$
+\begin{align*}
+\log p(x) &= \log \mathbb{E}_{z \sim q(z|x)}[\frac{p(x,z)}{q(z|x)}] \\
+&\geq \mathbb{E}_{z \sim q(z|x)}[\log \frac{p(x,z)}{q(z|x)}] \\
+& = \mathbb{E}_{z \sim q(z|x)}[\log p(x|z)] - \mathbb{E}_{z \sim q(z|x)}[\log \frac{q(z|x)}{p(z)}] \\
+&= \mathbb{E}_{z \sim q(z|x)}[\log p(x|z)] - \text{KL}(q(z|x) || p(z))
+\end{align*}
+$$
+
+Therefore, the loss function can be written as:
+
+$$
+\max_{\phi, \theta} \mathbb{E}_{z \sim q(z|x)}[\log p_{\theta}(x|z)] - \text{KL}(q_{\phi}(z|x) || p_{\theta}(z))
+$$
+
+**Reparameterization Trick:**
+
+The reparameterization trick is used to sample the latent variables from the posterior distribution $q_{\phi}(z|x)$ in a differentiable way.
+
+We let $q_{\phi}(z|x)$ output the parameters of the distribution function (Normal Distribution) for the latent variables $z$, which is the mean $\mu$ and the standard deviation $\sigma$ of the normal distribution.
+
+We can then rewrite the latent variables $z$ as a deterministic function of the random noise $\epsilon$ and the parameters $\phi$ and $x$:
+
+$$
+z = g(\mu, \phi, \epsilon) = \mu + \epsilon \sigma, \quad \text{where} \quad \epsilon \sim \mathcal{N}(0, I) \text{ is a random noise.}
+$$
+
+
+Proof:
+
+$$
+$$
+
+
+
+
+
+
+
+
+
+
 
 
 
