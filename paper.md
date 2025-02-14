@@ -310,6 +310,7 @@ Max value of JS divergence is always log2 when two distributions do not overlap.
 - Implicit density estimation: The generative model is not trained with the explicit density estimation. Instead, it is trained with purely the log-likelihood loss.
 - Variational Inference: The VAE is a variational inference model. It is a type of generative model that uses the variational inference to approximate the posterior distribution of the latent variables.
 - Reparameterization Trick: The VAE uses the reparameterization trick (Normal Distribution) to sample the latent variables from the posterior distribution, which maintains the differentiable property of the model.
+- Evidence Lower Bound (ELBO): The VAE uses the Evidence Lower Bound (ELBO) as the loss function. By maximizing the ELBO, we can maximize lower bound of the log-likelihood of the input $x$.
 
 ### Architecture:
 
