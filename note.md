@@ -214,6 +214,50 @@ f(x) &= f(a) + f'(a)(x-a) + \frac{f''(a)}{2}(x-a)^2 + \frac{f'''(a)}{6}(x-a)^3 +
 \end{align*}
 $$
 
+## Change of Variables
+
+Formula: 
+
+$$
+\int_{g(a)}^{g(b)} f(x) dx = \int_{a}^{b} f(g(x)) g'(x) dx
+$$
+
+Suppose we have a function $F$, and its derivative is $f$, and a change of variable $u = g(x)$. Let $L(x) = F(g(x))$, then we have:
+
+$$
+\begin{align*}
+L'(x) &= \frac{d}{dx} F(g(x)) \\
+&= f(g(x)) g'(x)
+\end{align*}
+$$
+
+$$
+\begin{align*}
+L(b) - L(a) &= \int_{a}^{b} L'(x) dx \\
+&= \int_{a}^{b} f(g(x)) g'(x) dx \\
+\end{align*}
+$$
+
+We know that $L(b) = F(g(b))$ and $L(a) = F(g(a))$, so we have:
+
+$$
+\begin{align*}
+F(g(b)) - F(g(a)) &= \int_{g(a)}^{g(b)} f(x) dx  \\
+\int_{g(a)}^{g(b)} f(x) dx &= \int_{a}^{b} f(g(x)) g'(x) dx
+\end{align*}
+$$
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Multivariate Calculus
 

@@ -377,8 +377,73 @@ $$
 
 Proof:
 
+We want $q_{\phi}(z|x)$ to be a normal distribution, where $\mu$ and $\sigma$ are computed based on the input $x$.Then we get $q_{\phi}(z|x) = p(z|\mu, \sigma)$.
+
+Suppose we try to estimate the value based on $z$ (for example, the final loss function can be seen as a function based on $z$), let's call it $f(z)$.
+
 $$
+\begin{align*}
+\mathbb{E}_{z \sim p(z|\mu, \sigma)}[f(z)] &= \int_{z} p(z|\mu, \sigma) f(z) dz  \\
+\end{align*}
 $$
+
+
+Let $z = g(\epsilon) = \mu + \epsilon \sigma$, then we have:
+
+$$
+\begin{align*}
+p(z|\mu, \sigma)dz &= p(g(\epsilon)|\mu, \sigma) g'(\epsilon) \ d\epsilon \\
+&= p(\mu + \epsilon \sigma|\mu, \sigma) \sigma \ d\epsilon \\
+& = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(\mu + \epsilon \sigma-\mu)^2}{2\sigma^2}} \sigma \ d\epsilon \\
+& = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(\epsilon \sigma)^2}{2\sigma^2}} \sigma \ d\epsilon \\
+& = \frac{1}{\sqrt{2\pi}} e^{-\frac{(\epsilon)^2}{2}} \ d\epsilon \\
+& = p(\epsilon|0, 1) \ d\epsilon
+\end{align*}
+$$
+
+Therefore, by changing the variable of $z$ to $g(\epsilon)$, we get:
+
+$$
+\begin{align*}
+\mathbb{E}_{z \sim p(z|\mu, \sigma)}[f(z)]  &= \int_{\epsilon} p(\epsilon|0, 1) f(g(\epsilon)) d\epsilon \\
+&= \mathbb{E}_{\epsilon \sim p(\epsilon|0, 1)}[f(\mu + \epsilon \sigma)]
+\end{align*}
+$$
+
+**Solution to the KL divergence:**
+
+$$
+\begin{align*}
+\log \frac{q_{\phi}(z|x)}{p_{\theta}(z)} &= \log \frac{N(z;\mu, \sigma)}{N(z|0, 1)} \\
+&= \log \frac{\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(z-\mu)^2}{2\sigma^2}}}{\frac{1}{\sqrt{2\pi}} e^{-\frac{z^2}{2}}} \\
+&= - \log {\sigma} + \log e^{-\frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2}} \\
+&= - \log {\sigma} - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2} \\
+&= - \log {\sigma} - \frac{1}{2\sigma^2}(z-\mu)^2 + \frac{1}{2} z^2 \\
+\end{align*}
+$$
+
+$$
+\begin{align*}
+
+\text{KL}(q_{\phi}(z|x) || p_{\theta}(z)) &= \mathbb{E}_{z \sim q_{\phi}(z|x)}[\log \frac{q_{\phi}(z|x)}{p_{\theta}(z)}]  \\
+&= \mathbb{E}_{z \sim q_{\phi}(z|x)}[- \log {\sigma} - \frac{1}{2\sigma^2}(z-\mu)^2 + \frac{1}{2} z^2] \\
+&= - \log {\sigma} - \frac{1}{2\sigma^2}\mathbb{E}_{z \sim q_{\phi}(z|x)}[(z-\mu)^2] + \frac{1}{2} \mathbb{E}_{z \sim q_{\phi}(z|x)}[z^2] \\
+&= - \log {\sigma} - \frac{1}{2\sigma^2}\sigma^2 + \frac{1}{2} (\mu^2 + \sigma^2) \\
+&= - \log {\sigma} - \frac{1}{2} + \frac{1}{2} \mu^2 + \frac{1}{2} \sigma^2 \\
+&= \frac{1}{2} \mu^2 + \frac{1}{2} \sigma^2 - \frac{1}{2} \log {\sigma}^2 - \frac{1}{2} \\
+&= \frac{1}{2} [(\mu^2 + \sigma^2) - \log {\sigma}^2 - 1]
+\end{align*}
+$$
+
+Note that 
+- $\mathbb{E}_{z \sim q_{\phi}(z|x)}[z^2] = \mathbb{E}_{z \sim q_{\phi}(z|x)}[(\mu + \epsilon \sigma)^2] = \mu^2 + \sigma^2$ because of the second moment equation of the normal distribution.
+- $\mathbb{E}_{z \sim q_{\phi}(z|x)}[(z-\mu)^2] = \sigma^2$ because of the variance equation of the normal distribution.
+
+
+
+
+
+
 
 
 
