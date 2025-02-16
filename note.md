@@ -216,10 +216,11 @@ $$
 
 ## Change of Variables
 
+### Single Dimension
 Formula: 
 
 $$
-\int_{g(a)}^{g(b)} f(x) dx = \int_{a}^{b} f(g(x)) g'(x) dx
+\int_{g(a)}^{g(b)} f(u) du = \int_{a}^{b} f(g(x)) g'(x) dx, \text{ where } u = g(x)
 $$
 
 Suppose we have a function $F$, and its derivative is $f$, and a change of variable $u = g(x)$. Let $L(x) = F(g(x))$, then we have:
@@ -242,26 +243,37 @@ We know that $L(b) = F(g(b))$ and $L(a) = F(g(a))$, so we have:
 
 $$
 \begin{align*}
-F(g(b)) - F(g(a)) &= \int_{g(a)}^{g(b)} f(x) dx  \\
-\int_{g(a)}^{g(b)} f(x) dx &= \int_{a}^{b} f(g(x)) g'(x) dx
+F(g(b)) - F(g(a)) &= \int_{g(a)}^{g(b)} f(u) du  \\
+\int_{g(a)}^{g(b)} f(u) du &= \int_{a}^{b} f(g(x)) g'(x) dx
 \end{align*}
 $$
 
-
-
-
-
-
-
-
-
-
-
-
+### Multivariate
 
 ## Multivariate Calculus
 
 ### Gradient
+
+Suppose along a curve $\vec{r}(t) =(x(t),y(t))$ we have a function $f(x(t),y(t)) = C$, where C a constant represent the height of the level curve.
+
+Taking the derivative of both side with respect to $t$, we get:
+
+$$
+\frac{d}{dt} f(x(t),y(t)) = \frac{\partial f}{\partial x} \frac{dx}{dt} + \frac{\partial f}{\partial y} \frac{dy}{dt} = 0
+$$
+
+This is the dot product of the gradient of $f$ and the tangent vector of the curve.
+
+$$
+\nabla f \cdot \frac{d\vec{r}}{dt} = 0
+$$
+
+To illustrate:
+
+<img src="./assets/gradient-explanation-level-curve.png" alt="gradient" style="zoom:50%;" />
+
+$\frac{d\vec{r}}{dt}$ is the tangent vector of the level curve function $f(x,y) = C$, going in the direction of the tangenet vector, $z$ remains constant, which is 1 shown in the picture. However, the gradient of $f$ is perpendicular to the level curve. Based on the observation, we can see that gradient is pointing in the steepest direction of the level curve.
+
 
 ### Lagrange Multiplier
 
