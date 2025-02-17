@@ -450,6 +450,80 @@ Note that
 - $\mathbb{E}_{z \sim q_{\phi}(z|x)}[(z-\mu)^2] = \sigma^2$ because of the variance equation of the normal distribution.
 
 
+## Understanding disentangling in β-VAE  https://arxiv.org/pdf/1804.03599
+
+### Novelty:
+
+- Disentangling: The authors suggested with large $\beta$, the latent space is disentangled into different independent factors of variation.
+- KL Divergence between the posterior distribution and the prior distribution of latent variables: The authors used the lagrangian multiplier to regularize the KL divergence between the posterior distribution and the prior distribution of latent variables.
+
+
+### Architecture:
+
+**Objective:**
+
+$$
+\max_{\phi, \theta} \mathbb{E}_{z \sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)] - \beta |\text{KL}(q_{\phi}(z|x) || p_{\theta}(z)) - C|
+$$
+
+**Intuition:**
+
+We can think the original VAE objective function as maximization problem of reconstruction log likelihood with constraint of KL divergence between the posterior distribution and the prior distribution of latent variables:
+
+$$
+\max_{\phi, \theta} \mathbb{E}_{z \sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)], \quad \text{with constraint: } \text{KL}(q_{\phi}(z|x) || p_{\theta}(z)) - C = 0
+$$
+
+By applying the lagrangian multiplier, we can rewrite the objective function as:
+
+$$
+\max_{\phi, \theta} \mathbb{E}_{z \sim q_{\phi}(z|x)}[\log p_{\theta}(x|z)] - \beta (\text{KL}(q_{\phi}(z|x) || p_{\theta}(z)) - C)
+$$
+
+By modifying $(q_{\phi}(z|x) || p_{\theta}(z)) - C)$, to be $|(q_{\phi}(z|x) || p_{\theta}(z)) - C|$, we are making the constraint constant term $C$ differentiable. Because it will make the gradient of $\text{KL}(q_{\phi}(z|x) || p_{\theta}(z))$ dependent on the sign of $\text{KL}(q_{\phi}(z|x) || p_{\theta}(z)) - C$.
+
+**Comparison between different $\beta$ and $C$:**
+
+<img src="./assets/beta-vae-small-beta.png" alt="image-20250217124206828" style="zoom:100%;" />
+
+- When $\beta$ is small, it is more likely to have a larger $\text{KL}(q_{\phi}(z|x) || p_{\theta}(z))$, which means that the posterior distribution $q_{\phi}(z|x)$ is more likely to be distant to the prior distribution $p_{\theta}(z)$. We can get a decent reconstruction network without having it learning the disentangling property of the latent space.
+
+<img src="./assets/beta-vae-large-beta.png" alt="image-20250217124206828" style="zoom:100%;" />
+
+- When $\beta$ is large, it is more likely to have a smaller $\text{KL}(q_{\phi}(z|x) || p_{\theta}(z))$, which means that the posterior distribution $q_{\phi}(z|x)$ is more likely to be close to the prior distribution $p_{\theta}(z)$. We can get a better disentangling property of the latent space. However, it is at the cost of the reconstruction quality because the distribution between the latent space of different classes is more likely to be tightly overlapped.
+
+<img src="./assets/beta-vae-large-beta-with-constant.png" alt="image-20250217124206828" style="zoom:50%;" />
+
+- By introducing a constant $C$, we can control the trade-off between the reconstruction quality and the disentangling property of the latent space. Because it keeps the distribution of the latent space of different classes apart from $N(0, 1)$, which can also be seen as an act to keep the latent space of different classes apart from each other. It can help to maintain a good quality of reconstruction while having a disentangling property of the latent space.
+
+**Analysis of $\beta$ and $C$ from the perspective of Lagrangian multiplier:**
+
+Consider the objective function $L$ with respect to $\beta$:
+
+$$
+\frac{d L}{d \beta} = C
+$$
+
+That means if we increase $\beta$ by a small amount $\Delta \beta$, we will have $L$ increased by $\Delta \beta * C$.
+
+Therefore, by introducing a constant $C$, we make log likelihood of reconstruction higher.
+
+### Experiment of disentangling on Dsprites dataset:
+
+**Original VAE (Beta=0, C=0):**
+
+<img src="./assets/original-vae-latent-traversal.png" alt="image-20250217124206828" style="zoom:100%;" />
+
+**Beta-VAE (Beta=100, C=37):**
+
+<img src="./assets/beta-vae-latent-traversal.png" alt="image-20250217124206828" style="zoom:100%;" />
+
+Based on the results, we can see that the latent traversal of beta-vae is more smooth and has better representation. Alought the authors did not provide detailed theoretical analysis on why increasing $\beta$ can lead to better disentangling, based on the empirical results, we can conclude that it is more likely to have a better disentangling property of the latent space when $\beta$ is larger.
+
+
+
+
+
 
 
 
