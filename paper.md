@@ -77,7 +77,7 @@ So, by dividing $v_t$ by $1-\beta_2^t$, we can get the unbiased estimate of the 
 
 ### Novelty:
 
-- It acts as a pre-processing step to the CNN to make it more robust to the spatial transformation.
+- Spatial Transformer Networks can be used as a pre-processing step to the CNN to make it more robust to the spatial transformation.
 - The spatial transformer network (STN) is often used at the first layer of the network. It transforms the input image to a canonical form, and then feed into the CNN.
 - Affine transformation is used to transform the input image. And the transformation matrix is learned by the network.
 
@@ -164,6 +164,83 @@ class Net(nn.Module):
 model = Net().to(device)
 
 ```
+
+## Residual Networks https://arxiv.org/pdf/1512.03385
+<img src="./assets/resnet-architecture.png" alt="image-20250218124206828" style="zoom:100%;" />
+
+### Novelty:
+
+- Identity Mapping: The theory of the residual block is based on the idea that adding extra layers of identity mapping will not make the performance of the network degrade. Thus, the network can be made deeper without the degradation of the performance.
+- Residual Block: The authors leveraged the identiy mapping theory in a clearer way and transformed the problem to be learning residual mappings, which has imrpoved gradient flow.
+
+### Architecture:
+
+**Residual Block:**
+
+<img src="./assets/resnet-residual-block.png" alt="image-20250218124206828" style="zoom:100%;" />
+
+As the above image shows, the residual block is a building block of the ResNet. It takes  input $x$ and first outputs $F(x)$. The $F(x)$ is the residual mapping that is learned by the network. By adding the identity mapping $x$, it makes $F(x) + x = H(x)$, where $H(x)$ is the final output and the desired underlying mapping of the residual block.
+
+**Intuition:**
+
+- **Why authors suggested that adding extra layers of identity mapping will not make the performance of the network degrade?**
+
+<img src="./assets/resnet-shallow-deepnetwork-comparison.png" alt="image-20250218124206828" style="zoom:100%;" />
+
+Suppose we have a shallow network, and a deeper network that is a composition of the shallow network and with added layers of identity mapping, plus a final layer of linear transformation.
+
+As shown in the above image, if the extra layers are identity mapping, then the deeper network will generate the same output at extra layer 2 as the output of the shallow network at layer 2. And theoretically, layer 3 and output layer will get better result with sophisticated training.
+
+Therefore, the deeper network will not degrade the performance of the shallow network.
+
+- **Why $H(x)=F(x)+x$ is better than $F(x)$ from gradient analysis perspective?**
+
+Let $x$ be the output of the previous layers. And $L$ is the loss function of the block.
+
+Gradient of Loss with respect to $x$ for $F(x)$:
+
+$$
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial F(x)} \cdot \frac{\partial F(x)}{\partial x}
+$$
+
+Gradient of Loss with respect to $x$ for $H(x)=F(x)+x$:
+
+$$
+\frac{\partial L}{\partial x} = \frac{\partial L}{\partial H(x)} \cdot \frac{\partial H(x)}{\partial x} = \frac{\partial L}{\partial H(x)} \cdot (1 + \frac{\partial F(x)}{\partial x})
+$$
+
+
+As we can see that the RHS of the product for $H(x)$ has extra term of 1, this will guarentee the gradient more resilient to be vanished. It becomes obviosus if we consider a longer sequence.
+Let $(F_1,F_2,F_3,..., F_n)$ be the sequence of identity mapping functions, and  $(H_1,H_2,H_3,..., H_n)$ be the sequence of residual functions, where $H_i(x)=F_i(x)+x$.
+
+Gradient of Loss with respect to $x$ for $(F_1,F_2,F_3,..., F_n)$:
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial x} & = \frac{\partial L}{\partial F_n(x)} \cdot \frac{\partial F_n(x)}{\partial x} \\
+& = \frac{\partial L}{\partial F_n(x)} \cdot ( \frac{\partial F_{n-1}(x)}{\partial x}) \cdot ( \frac{\partial F_{n-2}(x)}{\partial x}) \cdots ( \frac{\partial F_1(x)}{\partial x}) \\
+& =  \frac{\partial L}{\partial F_n(x)} \prod_{i=1}^{n-1}  \frac{\partial F_i(x)}{\partial x}
+\end{align*}
+$$
+
+Gradient of Loss with respect to $x$ for $(H_1,H_2,H_3,..., H_n)$:
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial x} & = \frac{\partial L}{\partial H_n(x)} \cdot \frac{\partial H_n(x)}{\partial x} \\
+& = \frac{\partial L}{\partial H_n(x)} \cdot (\frac{\partial H_{n-1}(x)}{\partial x}) \cdot ( \frac{\partial H_{n-2}(x)}{\partial x}) \cdots ( \frac{\partial F_1(x)}{\partial x})\\
+&= \frac{\partial L}{\partial H_n(x)} \cdot (1 + \frac{\partial F_{n-1}(x)}{\partial x}) \cdot (1 + \frac{\partial F_{n-2}(x)}{\partial x}) \cdots (1 + \frac{\partial F_1(x)}{\partial x}) \\
+& = \frac{\partial L}{\partial H_n(x)} \prod_{i=1}^{n-1} (1 + \frac{\partial F_i(x)}{\partial x})
+\end{align*}
+$$  
+
+
+As we can see, the graident for identity mapping function is more likely to be vanished. On the other hand, the gradient for residual function will not face the vanishing gradient problem. However, the gradient for residual function is more likely to explode. Based on the empirical experiements, applying the batch normalization to each convolution layer can help to stabilize the gradient.
+
+
+
+
+
 
 # Generative Model
 
@@ -455,7 +532,7 @@ Note that
 ### Novelty:
 
 - Disentangling: The authors suggested with large $\beta$, the latent space is disentangled into different independent factors of variation.
-- KL Divergence between the posterior distribution and the prior distribution of latent variables: The authors used the lagrangian multiplier to regularize the KL divergence between the posterior distribution and the prior distribution of latent variables.
+- Weighted factor of KL Divergence: The authors used the lagrangian multiplier to regularize the KL divergence between the posterior distribution and the prior distribution of latent variables.
 
 
 ### Architecture:
@@ -519,6 +596,85 @@ Therefore, by introducing a constant $C$, we make log likelihood of reconstructi
 <img src="./assets/beta-vae-latent-traversal.png" alt="image-20250217124206828" style="zoom:100%;" />
 
 Based on the results, we can see that the latent traversal of beta-vae is more smooth and has better representation. Alought the authors did not provide detailed theoretical analysis on why increasing $\beta$ can lead to better disentangling, based on the empirical results, we can conclude that it is more likely to have a better disentangling property of the latent space when $\beta$ is larger.
+
+### Code Implementation:
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# --- Define a simple convolutional VAE architecture ---
+class VAE(nn.Module):
+    def __init__(self, latent_dim=10):
+        super(VAE, self).__init__()
+        self.latent_dim = latent_dim
+        # Encoder: input (1, 64, 64) -> feature vector
+        self.encoder = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1),  # -> (32, 32, 32)
+            nn.ReLU(),
+            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1), # -> (32, 16, 16)
+            nn.ReLU(),
+            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1),# -> (32, 8, 8)
+            nn.ReLU(),
+            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1),# -> (32, 4, 4)
+            nn.ReLU(),
+            nn.Flatten()  # 32*4*4 = 512
+        )
+        # Linear layers to output the mean and log-variance of z
+        self.fc_mu = nn.Linear(32 * 4 * 4, latent_dim)
+        self.fc_logvar = nn.Linear(32 * 4 * 4, latent_dim)
+        # Decoder: project latent vector back to image space
+        self.decoder_input = nn.Linear(latent_dim, 32 * 4 * 4)
+        self.decoder = nn.Sequential(
+            nn.Unflatten(1, (32, 4, 4)),
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # -> (32, 8, 8)
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),   # -> (32, 16, 16)
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),    # -> (32, 32, 32)
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),     # -> (1, 64, 64)
+            nn.Sigmoid()
+        )
+    
+    def encode(self, x):
+        h = self.encoder(x)
+        mu = self.fc_mu(h)
+        logvar = self.fc_logvar(h)
+        return mu, logvar
+    
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+    
+    def decode(self, z):
+        h = self.decoder_input(z)
+        return self.decoder(h)
+    
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        x_recon = self.decode(z)
+        return x_recon, mu, logvar
+
+# Loss function with adjustable beta (β = 1 for VAE; β > 1 for β-VAE)
+def loss_function(x, x_recon, mu, logvar, beta=1.0, C=0.0):
+    # Binary cross entropy for reconstruction
+    recon_loss = nn.functional.binary_cross_entropy(x_recon, x, reduction='sum') / x.size(0)
+    # KL divergence loss
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+    kl_loss = kl_loss - C
+    return recon_loss + beta * torch.abs(kl_loss), recon_loss, torch.abs(kl_loss)
+
+```
+
+
+
 
 
 
