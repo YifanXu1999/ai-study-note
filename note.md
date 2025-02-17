@@ -276,6 +276,33 @@ $\frac{d\vec{r}}{dt}$ is the tangent vector of the level curve function $f(x,y) 
 
 
 ### Lagrange Multiplier
+Give a constraint $g(x) = 0$, we want to find the maximum or minimum of a function $f(x)$.
+$$
+\begin{align*}
+\max_{x} f(x) \\
+s.t. \quad g(x) = 0
+\end{align*}
+$$
+Formulate the problem as the Lagrangian function:
+$$
+\begin{align*}
+L(x, \lambda) = f(x) - \lambda g(x)
+\end{align*}
+$$
+Take the gradient of $L$ with respect to $x$ and $\lambda$, we get:
+$$
+\begin{align*}
+\nabla L = \nabla f - \lambda \nabla g = 0 \\
+\end{align*}
+$$
+
+Solve for $\lambda$ and $x$, we get the critical points.
+
+**Why for a constrained optimization problem, the critical points are found when the gradient of the objective function is parallel to the gradient of the constraint?**
+
+At any possible level of $c=f(x)$,  $f(x)$ and $g(x)$ are following the same orientation, otherwise, $f(x)$ is not constrained to the level curve of $g(x)$. Thus, the tangent vector of $f(x)$ and $g(x)$ are parallel. This implies that the gradient of $f(x)$ and $g(x)$ are also parallel.
+
+Therefore, we can say that the critical points are found when the gradient of the objective function is parallel to the gradient of the constraint.
 
 
 
