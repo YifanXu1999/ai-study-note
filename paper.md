@@ -210,7 +210,7 @@ $$
 $$
 
 
-As we can see that the RHS of the product for $H(x)$ has extra term of 1, this will guarentee the gradient more resilient to be vanished. It becomes obviosus if we consider a longer sequence.
+As we can see that the RHS of the product for $H(x)$ has extra term of 1, this will guarentee the gradient more resilient to be vanished. It becomes obvious with a longer sequence.
 Let $(F_1,F_2,F_3,..., F_n)$ be the sequence of identity mapping functions, and  $(H_1,H_2,H_3,..., H_n)$ be the sequence of residual functions, where $H_i(x)=F_i(x)+x$.
 
 Gradient of Loss with respect to $x$ for $(F_1,F_2,F_3,..., F_n)$:
