@@ -191,7 +191,7 @@ Suppose we have a shallow network, and a deeper network that is a composition of
 
 As shown in the above image, if the extra layers are identity mapping, then the deeper network will generate the same output at extra layer 2 as the output of the shallow network at layer 2. And theoretically, layer 3 and output layer will get better result with sophisticated training.
 
-Therefore, the deeper network will not degrade the performance of the shallow network.
+Therefore, theoretically, the deeper network with extra layers ofidentity mapping will not degrade the performance of the shallow network.
 
 - **Why $H(x)=F(x)+x$ is better than $F(x)$ from gradient analysis perspective?**
 
@@ -211,15 +211,17 @@ $$
 
 
 As we can see that the RHS of the product for $H(x)$ has extra term of 1, this will guarentee the gradient more resilient to be vanished. It becomes obvious with a longer sequence.
-Let $(F_1,F_2,F_3,..., F_n)$ be the sequence of identity mapping functions, and  $(H_1,H_2,H_3,..., H_n)$ be the sequence of residual functions, where $H_i(x)=F_i(x)+x$.
+Let $(F_1,F_2,F_3,..., F_n)$ be the sequence of identity mapping functions, and  $(H_1,H_2,H_3,..., H_n)$ be the sequence of residual functions, where $H_i(x)=H_{i-1}(x)+F_i(x)$, and $H_0(x)=x$.
 
 Gradient of Loss with respect to $x$ for $(F_1,F_2,F_3,..., F_n)$:
 
+
+
 $$
 \begin{align*}
-\frac{\partial L}{\partial x} & = \frac{\partial L}{\partial F_n(x)} \cdot \frac{\partial F_n(x)}{\partial x} \\
-& = \frac{\partial L}{\partial F_n(x)} \cdot ( \frac{\partial F_{n-1}(x)}{\partial x}) \cdot ( \frac{\partial F_{n-2}(x)}{\partial x}) \cdots ( \frac{\partial F_1(x)}{\partial x}) \\
-& =  \frac{\partial L}{\partial F_n(x)} \prod_{i=1}^{n-1}  \frac{\partial F_i(x)}{\partial x}
+\frac{\partial L}{\partial x}
+& = \frac{\partial L}{\partial F_n(x)} \cdot ( \frac{\partial F_{n}(x)}{\partial F_{n-1}(x)}) \cdot ( \frac{\partial F_{n-1}(x)}{\partial F_{n-2}(x)}) \cdots ( \frac{\partial F_1(x)}{\partial x}) \\
+& =  \frac{\partial L}{\partial F_n(x)} \cdot  \frac{\partial F_1(x)}{\partial x}  \prod_{i=2}^{n-1}  \frac{\partial F_i(x)}{\partial F_{i-1}(x)}
 \end{align*}
 $$
 
@@ -227,10 +229,10 @@ Gradient of Loss with respect to $x$ for $(H_1,H_2,H_3,..., H_n)$:
 
 $$
 \begin{align*}
-\frac{\partial L}{\partial x} & = \frac{\partial L}{\partial H_n(x)} \cdot \frac{\partial H_n(x)}{\partial x} \\
-& = \frac{\partial L}{\partial H_n(x)} \cdot (\frac{\partial H_{n-1}(x)}{\partial x}) \cdot ( \frac{\partial H_{n-2}(x)}{\partial x}) \cdots ( \frac{\partial F_1(x)}{\partial x})\\
-&= \frac{\partial L}{\partial H_n(x)} \cdot (1 + \frac{\partial F_{n-1}(x)}{\partial x}) \cdot (1 + \frac{\partial F_{n-2}(x)}{\partial x}) \cdots (1 + \frac{\partial F_1(x)}{\partial x}) \\
-& = \frac{\partial L}{\partial H_n(x)} \prod_{i=1}^{n-1} (1 + \frac{\partial F_i(x)}{\partial x})
+\frac{\partial L}{\partial x} 
+& = \frac{\partial L}{\partial H_n(x)} \cdot (\frac{\partial H_{n}(x)}{\partial H_{n-1}(x)}) \cdot ( \frac{\partial H_{n-1}(x)}{\partial H_{n-2}(x)}) \cdots ( \frac{\partial H_1(x)}{\partial x})\\
+&= \frac{\partial L}{\partial H_n(x)} \cdot (\frac{\partial H_{n-1}(x) + F_{n}(x)}{\partial H_{n-1}(x)}) \cdot ( \frac{\partial H_{n-2}(x) + F_{n-1}(x)}{\partial H_{n-2}(x)}) \cdots ( \frac{\partial H_0(x) + F_1(x)}{\partial x})\\
+& = \frac{\partial L}{\partial H_n(x)} (1+ \frac{\partial F_1(x)}{\partial x}) \prod_{i=2}^{n-1} (1 + \frac{\partial F_i(x)}{\partial H_{i-1}(x)})
 \end{align*}
 $$  
 
