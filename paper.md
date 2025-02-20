@@ -481,12 +481,11 @@ Let $z = g(\epsilon) = \mu + \epsilon \sigma$, then we have:
 
 $$
 \begin{align*}
-p(z|\mu, \sigma)dz &= p(g(\epsilon)|\mu, \sigma) g'(\epsilon) \ d\epsilon \\
-&= p(\mu + \epsilon \sigma|\mu, \sigma) \sigma \ d\epsilon \\
+p(g(\epsilon)|\mu, \sigma) g'(\epsilon) \ d\epsilon &= p(\mu + \epsilon \sigma|\mu, \sigma) \sigma \ d\epsilon \\
 & = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(\mu + \epsilon \sigma-\mu)^2}{2\sigma^2}} \sigma \ d\epsilon \\
 & = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(\epsilon \sigma)^2}{2\sigma^2}} \sigma \ d\epsilon \\
 & = \frac{1}{\sqrt{2\pi}} e^{-\frac{(\epsilon)^2}{2}} \ d\epsilon \\
-& = p(\epsilon|0, 1) \ d\epsilon
+& = p(\epsilon|0, 1) \ d\epsilon\\
 \end{align*}
 $$
 
@@ -494,7 +493,9 @@ Therefore, by changing the variable of $z$ to $g(\epsilon)$, we get:
 
 $$
 \begin{align*}
-\mathbb{E}_{z \sim p(z|\mu, \sigma)}[f(z)]  &= \int_{\epsilon} p(\epsilon|0, 1) f(g(\epsilon)) d\epsilon \\
+\mathbb{E}_{z \sim p(z|\mu, \sigma)}[f(z)]  &= \int_{z} p(z|\mu, \sigma) f(z) dz \\
+&= \int_{\epsilon} p(\epsilon|\mu, \sigma) f(\mu + \epsilon \sigma) g'(\epsilon)  d\epsilon \\
+&= \int_{\epsilon} p(\epsilon|0, 1) f(\mu + \epsilon \sigma) \ d\epsilon \\
 &= \mathbb{E}_{\epsilon \sim p(\epsilon|0, 1)}[f(\mu + \epsilon \sigma)]
 \end{align*}
 $$
@@ -674,6 +675,44 @@ def loss_function(x, x_recon, mu, logvar, beta=1.0, C=0.0):
     return recon_loss + beta * torch.abs(kl_loss), recon_loss, torch.abs(kl_loss)
 
 ```
+
+## Variational Inference with Normalizing Flows https://arxiv.org/pdf/1505.05770
+
+### Novelty:
+
+- Normalizing Flows: The authors proposed a new method to sample from the posterior distribution of the latent variables by using the normalizing flows to transform the simple distribution (like Gaussian Distribution) into a complex distribution.
+
+### Prerequisite:
+
+#### Deep Latent Gaussian Models:
+
+$$
+p(x, z_1, z_2, ..., z_L) = p(x|f_0(z_1)) \prod_{l=1}^{L} p(z_l|f_l(z_{l+1}))
+$$
+
+It is a top-down flow that
+1. Start from samping the latent variable $z_L$ from $p(z_L | f_L(z_{L+1})) = p(z_L) = N(0, I)$.
+2. For $l=L-1, L-2, ..., 1$:
+3. $\hspace{10px}$ Sample $z_l$ from $p(z_l|f_l(z_{l+1}))$
+4. Sample $x$ from $p(x|f_0(z_1))$
+
+
+#### Change of Variables for Bijective Transformations:
+
+Let $z' = f(z)$, then we have:
+
+$$
+q(z') = q(z) \left| \frac{\partial f^{-1}}{\partial z'}\right| =q(z) \left|\frac{\partial f}{\partial z}\right|^{-1}
+$$
+
+Proof:
+
+$$
+\int_{z'} q(z') dz' = \int_{z} q(z) \left| \frac{\partial f^{-1}}{\partial z'}\right| dz' = \int_{z} q(z) \left|\frac{\partial f}{\partial z}\right|^{-1} dz = 1
+$$
+
+
+
 
 
 
