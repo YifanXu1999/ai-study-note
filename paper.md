@@ -690,12 +690,6 @@ $$
 p(x, z_1, z_2, ..., z_L) = p(x|f_0(z_1)) \prod_{l=1}^{L} p(z_l|f_l(z_{l+1}))
 $$
 
-It is a top-down flow that
-1. Start from samping the latent variable $z_L$ from $p(z_L | f_L(z_{L+1})) = p(z_L) = N(0, I)$.
-2. For $l=L-1, L-2, ..., 1$:
-3. $\hspace{10px}$ Sample $z_l$ from $p(z_l|f_l(z_{l+1}))$
-4. Sample $x$ from $p(x|f_0(z_1))$
-
 
 #### Change of Variables for Bijective Transformations:
 
@@ -712,33 +706,223 @@ $$
 $$
 
 
+Let $f: A \rightarrow f(A)$ be a bijective function, then we have for any $z \in A$, $z' = f(z)$.
+
+Because $f$ is a bijective function, then the inverse function $f^{-1}$ exists. And the probability for $z' \in f(A) = U$ is the same as the probability for $z \in A$.
+
+$$
+\begin{align*}
+P(z'\in U) &= P(z \in A) \\
+\int_{z'\in U} q(z') dz' &= \int_{z\in A} q(z) dz \\
+\end{align*}
+$$
+
+We know that $z = f^{-1}(z')$, and $(f^{-1})^{-1} = f $. By the change of variables, we have:
+
+$$
+\begin{align*}
+ \int_{z\in A} q(z) dz &= \int_{z'\in U} q(f^{-1}(z')) \left| \text{det}(\frac{\partial f^{-1}}{\partial z'}) \right| dz'\\
+&= \int_{z'\in U} q(z) \left| \text{det}(\frac{\partial f}{\partial z}) \right| ^{-1} dz'  \quad \text{because } \text{det}(J_{f^{-1}}(p)) = \text{det}(J_{f}^{-1}(f^{-1}(p)))
+\end{align*}
+$$
+
+Therefore, we have:
+
+$$
+\int_{z'\in U} q(z') dz' = \int_{z'\in U} q(z) \left| \text{det}(\frac{\partial f}{\partial z}) \right| ^{-1} dz'
+$$
+
+Then we have:
+
+$$
+q(z') = q(z) \left| \text{det}(\frac{\partial f}{\partial z}) \right|
+$$
 
 
+### Architecture:
 
 
+Let $q_K(z)$ obtained by successively applying $K$ bijective transformations $f_1, f_2, ..., f_K$ on $z_0$, we have:
+
+$$
+q_K(z_K) = q_0(z_0) \prod_{k=1}^{K} \left| \text{det}(\frac{\partial f_k}{\partial z_{k-1}})  \right| ^{-1}
+$$
+
+Apply the ln, then we get:
+
+$$
+\ln q_K(z_K) = \ln q_0(z_0) - \sum_{k=1}^{K} \ln \left| \text{det}(\frac{\partial f_k}{\partial z_{k-1}})  \right|
+$$
 
 
+**Objective:**
+
+Similar to ELBO in VAE, we have:
+
+$$
+\begin{align*}
+F(x) &= \mathbb{E}_{z \sim q_{\phi}(z|x)}[\ln q_{\phi}(z|x) - \ln p(x, z)] \\
+&= \mathbb{E}_{z \sim q_{0}(z_0)}[\ln q_{K}(z_K) - \ln p(x, z_K)] \\
+&= \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln q_{0}(z_0)] - \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\sum_{k=1}^{K} \ln \left| \text{det}(\frac{\partial f_k}{\partial z_{k-1}})  \right|] - \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln p(x, z_K)] \\
+\end{align*}
+$$
+
+- $\mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln q_{0}(z_0)]$: The prior distribution of the latent variable $z_0$ encoded by the input $x$.
+- $\mathbb{E}_{z_0 \sim q_{0}(z_0)}[\sum_{k=1}^{K} \ln \left| \text{det}(\frac{\partial f_k}{\partial z_{k-1}})  \right|]$: The log determinant of the Jacobian matrix of the transformation $f_k$.
+- $\mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln p(x, z_K)]$: The log likelihood of the generated image $x$ obtained by the latent variable $z_K$.
+
+**Steps of the algorithm:**
+
+1. The encoder outputs $\mu$ and $\sigma$ based on the input $x$.
+
+2. Sample $z_0 = \mu + \sigma \odot \epsilon$ (using the reparameterization trick)
+
+3. Apply each flow $f_k$ sequentially to obtain $z_K$ and accumulate the log-determinants:
+   $$z_k = f_k(z_{k-1})$$
+   $$ \ln q_K(z_K) = \ln q_0(z_0) - \sum_{k=1}^{K} \ln \left|\text{det}(\frac{\partial f_k}{\partial z_{k-1}})\right|$$
+
+4. Use $z_K$ to decode the image $x$ and compute the log likelihood:
+   $$ \ln p(x, z_K) $$
+
+5. Compute the loss function:
+   $$ F(x) = \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln q_{0}(z_0)] - \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\sum_{k=1}^{K} \ln \left|\text{det}(\frac{\partial f_k}{\partial z_{k-1}})\right|] - \mathbb{E}_{z_0 \sim q_{0}(z_0)}[\ln p(x, z_K)] $$
+
+**Planar Flow:**
+
+Let ${u\in \mathbb{R}^d, w\in \mathbb{R}^d, b\in \mathbb{R}}$ be the parameters of the planar flow, and $h$ be the $tanh$ function, then we have:
+$$
+z' = f(z) = z + uh(w^T z + b)
+$$
+
+Let $\psi(z)$ be the Jacobian matrix of $h(w^T z + b)$ (think about the derivative of $tanh$), then we have:
+
+$$
+\left|\text{det}(\frac{\partial f}{\partial z})\right| = \left|1 + u^T \psi(z)\right|
+$$
+
+Then this turns $\sum_{k=1}^{K} \ln \left|\text{det}(\frac{\partial f_k}{\partial z_{k-1}})\right|$ into:
+
+$$
+\sum_{k=1}^{K} \ln \left|\text{det}(\frac{\partial f_k}{\partial z_{k-1}})\right| = \sum_{k=1}^{K} \ln \left|1 + u_k^T \psi(z_{k-1})\right|
+$$
 
 
+### Code Implementation:
+
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import math
+
+# Define a single planar flow layer
+class PlanarFlow(nn.Module):
+    def __init__(self, z_dim):
+        super(PlanarFlow, self).__init__()
+        self.u = nn.Parameter(torch.randn(1, z_dim))
+        self.w = nn.Parameter(torch.randn(1, z_dim))
+        self.b = nn.Parameter(torch.randn(1))
+    
+    def forward(self, z):
+        # z: [batch, z_dim]
+        linear = torch.matmul(z, self.w.t()) + self.b  # [batch, 1]
+        activation = torch.tanh(linear)                # [batch, 1]
+        z_new = z + self.u * activation                # [batch, z_dim]
+        
+        # Compute the derivative of tanh(linear): 1 - tanh^2(linear)
+        psi = (1 - torch.tanh(linear) ** 2) * self.w     # [batch, z_dim]
+        # Determinant: |1 + u^T psi|
+        u_psi = torch.matmul(psi, self.u.t())            # [batch, 1]
+        log_det_jacobian = torch.log(torch.abs(1 + u_psi) + 1e-8).squeeze(1)  # [batch]
+        return z_new, log_det_jacobian
+
+# Define the VAE with flows
+class VAEWithFlows(nn.Module):
+    def __init__(self, input_dim, hidden_dim, z_dim, num_flows):
+        super(VAEWithFlows, self).__init__()
+        # Encoder network
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.fc_mu = nn.Linear(hidden_dim, z_dim)
+        self.fc_logvar = nn.Linear(hidden_dim, z_dim)
+        # Decoder network
+        self.fc3 = nn.Linear(z_dim, hidden_dim)
+        self.fc4 = nn.Linear(hidden_dim, input_dim)
+        # Flow layers
+        self.flows = nn.ModuleList([PlanarFlow(z_dim) for _ in range(num_flows)])
+    
+    def encode(self, x):
+        h = F.relu(self.fc1(x))
+        mu = self.fc_mu(h)
+        logvar = self.fc_logvar(h)
+        return mu, logvar
+    
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std  # z0
+    
+    def decode(self, z):
+        h = F.relu(self.fc3(z))
+        return torch.sigmoid(self.fc4(h))  # For binary data
+    
+    def compute_log_normal(self, z, mu, logvar):
+        # Compute log probability of z under N(mu, exp(logvar))
+        return -0.5 * (logvar + math.log(2 * math.pi) + ((z - mu) ** 2) / torch.exp(logvar)).sum(dim=1)
+    
+    def forward(self, x):
+        # 1. Encode x into parameters of q0(z|x)
+        mu, logvar = self.encode(x)
+        z0 = self.reparameterize(mu, logvar)
+        log_qz0 = self.compute_log_normal(z0, mu, logvar)
+        
+        # 2. Apply the sequence of flows to obtain z_K
+        sum_log_det = 0.
+        z = z0
+        for flow in self.flows:
+            z, log_det = flow(z)
+            sum_log_det += log_det
+        log_q_zK = log_qz0 - sum_log_det
+        
+        # 3. Compute prior log-probability for z_K (assume standard Normal)
+        log_pz = self.compute_log_normal(z, torch.zeros_like(z), torch.zeros_like(z))
+        
+        # 4. Decode z_K to reconstruct x
+        x_recon = self.decode(z)
+        # Reconstruction likelihood (binary cross entropy for binarized data)
+        recon_loss = F.binary_cross_entropy(x_recon, x, reduction='sum')
+        
+        # ELBO: log p(x|z_K) + log p(z_K) - log q(z_K|x)
+        elbo = -recon_loss + log_pz - log_q_zK
+        return elbo, x_recon, mu, logvar, z
+
+# Example usage:
+if __name__ == '__main__':
+    # Example hyperparameters
+    input_dim = 784  # e.g., flattened MNIST images (28x28)
+    hidden_dim = 400
+    z_dim = 40
+    num_flows = 10
+
+    model = VAEWithFlows(input_dim, hidden_dim, z_dim, num_flows)
+    
+    # Dummy batch of data
+    x = torch.randn(64, input_dim)  # batch of 64 images
+    elbo, x_recon, mu, logvar, z = model(x)
+    
+    # We maximize the ELBO (or equivalently, minimize -ELBO)
+    loss = -elbo.mean()
+    loss.backward()
+    print("Loss:", loss.item())
 
 
+```
+
+## MADE: Masked Autoencoder for Distribution Estimation https://arxiv.org/pdf/1502.03509
+
+### Novelty:
+
+- Mask Matrix: Applied a mask matrix to the weight matrix of the network to simulate autoregressive depenency of output to the input.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img src="./assets/made.png" alt="image-20250222162553333" style="zoom:50%;" />
 
