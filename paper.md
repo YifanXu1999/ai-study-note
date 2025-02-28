@@ -735,7 +735,7 @@ $$
 Then we have:
 
 $$
-q(z') = q(z) \left| \text{det}(\frac{\partial f}{\partial z}) \right|
+q(z') = q(z) \left| \text{det}(\frac{\partial f}{\partial z}) \right|^{-1}
 $$
 
 
@@ -923,6 +923,79 @@ if __name__ == '__main__':
 
 - Mask Matrix: Applied a mask matrix to the weight matrix of the network to simulate autoregressive depenency of output to the input.
 
+### Architecture:
 
 <img src="./assets/made.png" alt="image-20250222162553333" style="zoom:50%;" />
+
+**Components:**
+
+- $W$ the weight matrix between input $X$ and the hidden layer $H$
+- $V$ the weight matrix between hidden layer $H$ and the output layer $\hat{X}$
+- $M^{W}$ the mask matrix for $W$
+- $M^{V}$ the mask matrix for $V$
+- $m(k)^l$ the value of the $k$th neuron in the $l$ th layer, such that for the input layer and output layer $m(k) = k$, while for the hidden layer $m(k)$ is randomly sampled from $\{1, 2, ..., D-1\}$
+
+**Intuition:**
+
+
+
+<img src="./assets/made-fully-connected.png" alt="image-20250222162553333" style="zoom:50%;" />
+
+For a fully connected network, given a 1-D vector $x=(x_1, x_2, x_3)$ of image,  we have $\hat{x}_i$ generated based on all the input pixels $x_1, x_2, x_3$. Written in probability distribution, we have:
+
+$$
+p(x_1) = p(x_1|x_1, x_2, x_3) \\
+p(x_2) = p(x_2|x_1, x_2, x_3) \\
+p(x_3) = p(x_3|x_1, x_2, x_3)
+$$
+
+
+However, the goal of probability distribution we want is:
+
+$$
+p(x_1, x_2, x_3)
+$$
+which then can be factorized as:
+
+$$
+\begin{align*}
+p(x_1, x_2, x_3) &= p(x_1)p(x_2|x_1)p(x_3|x_1, x_2) \\
+&= \prod_{i=1}^{3} p(x_i|x_{<i})
+\end{align*}
+$$
+
+And this is essentially the autoregressive model that pixel $x_i$ is generated based on the previous pixels $x_1, x_2, ..., x_{i-1}$.
+
+To establish the autoregressive dependency, for example, the output $\hat{x_2}$. We want it to be generated based on the input of $x_1$. What we can do is to first pick the nodes at the hidden layer that we want to use to generate $\hat{x_2}$, and then cut their connections with the input $x_2$ and $x_3$. By doing this, we can ensure that the output $\hat{x_2}$ is only generated based on the input $x_1$.
+
+The authors of the paper proposed a brilliant methodlogy to perform connection cutting.
+
+1. For the input layer, we assign each input $x_i$ a value $i$
+
+2. For the hidden layer, we assign each neuron a value $m(k)$ between $1$ and $D-1$ (where $D$ is the dimension of the input).
+
+3. Construct the mask matrix $M^W$ that would cut the connection between $x_i$ and $h_j$ if $m(x_i) > m(h_j)$. 
+
+3. Construct the mask matrix $M^V$ that would cut the connection between $h_j$ and $\hat{x_i}$ if $m(h_j) >= m(\hat{x_i})$.
+
+By such construction, we can ensure that the output $\hat{x_i}$ is never dependent on the input $x_i,... x_D$. In other words, the output $\hat{x_i}$ is only dependent on the input $x_1, x_2, ..., x_{i-1}$, and we can write the probability distribution as $p(x_i|x_1, x_2, ..., x_{i-1})$ which is exactly the autoregressive dependency we want.
+
+**Add-Ons:**
+
+- Order-agnostic training: The authors proposed to train the model by randomly shuffing the $m_k$ values for the input and output layers. 
+
+### Limitation:
+
+- The model is not scalable to high-dimensional data.
+
+- For a image input, the pixel is likely to be dependent on the neighboring pixels instead of the previous pixels. Therefore, the model is not able to capture the spatial information.
+
+
+
+
+
+
+
+
+
 
