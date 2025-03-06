@@ -4,6 +4,10 @@
 
 ### Novelty:
 
+- Optimize the policy with the constraint on the parameters of the KL divergence between the old and new policy. By smartly translating the optimization problem into a quadratic programming problem, the optimization then becomes maximizing the expected return of the policy while keeping the KL divergence between the old and new policy as low as possible. 
+- Conjugate Gradient Method is used to solve the quadratic programming problem. Because the derived quadratic function of KL divergence is a matrix vector product with the Hessian of KL divergence, which is a symmetric matrix. Thus, the conjugate gradient method is a good choice in comparison to the steepest descent method.
+- Fisher Vector Product (Hessian of KL divergence is a Fisher Information Matrix) is used to efficiently compute the $Hv$ without explicitly computing the Hessian matrix $H$, which is a $n^2$ matrix. Finding the first order derivative of KL divergence is enough to compute the Fisher Vector Product.
+
 ### Preliminaries:
 
 **Expected Return of Policy $\tilde{\pi}$:**
@@ -242,16 +246,85 @@ $$
 
 $$
 \begin{align*}
-\mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t A_{\pi}(s_t, a_t)] &= \mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t (Q_{\pi}(s_t, a_t) - V_{\pi}(s_t))]\\
+\mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t A_{\pi}(s_t, a_t)] &= \mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t (r(s_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t))]\\
 
+&= \mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t r(s_t)] + \mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^{t+1}  V_{\pi}(s_{t+1})- \gamma^t V_{\pi}(s_t)]\\
 
+&= \mathbb{E}_{\tau \sim \tilde{\pi}}[\sum_{t=0}^{\infty} \gamma^t r(s_t)] - \mathbb{E}_{\tau \sim \tilde{\pi}}[V_{\pi}(s_0)]\\
+
+&=\eta(\tilde{\pi}) - V_{\pi}(s_0)\\
+&= \eta(\tilde{\pi}) - \eta(\pi)
 \end{align*}
 
 $$
 
 **Policy Improvement Bound:**
 
+By definition, the surrogate expected return is:
 
-**Monotonic Improvement:**
+$$
+\begin{align*}
+L_{\pi}(\tilde{\pi}) &= \eta(\pi) + \sum_{s \in \mathcal{S}} \rho_{\pi}(s) \sum_{a \in \mathcal{A}} \tilde{\pi}(a|s) A_{\pi}(s, a)\\
+&= \eta(\pi) + \mathbb{E}_{s_t \sim \pi}[\sum_{t=0}^{\infty} \gamma^t \mathbb{E}_{a_t \sim \tilde{\pi}(a_t|s_t)}[A(s_t, a_t)]]\\
+\end{align*}
+
+$$
+
+Definition 1: let $(\pi, \tilde{\pi})$ be a $\alpha$-coupled distribution such that for $a\sim \pi, a'\sim \tilde{\pi}$, $P(a\not=a'|s) \leq \alpha$.
 
 
+$$
+\begin{align*}  
+\mathbb{E}_{\tilde{a} \sim \tilde{\pi}}[A_{\pi}(s, \tilde{a})] &= \mathbb{E}_{\tilde{a} \sim \tilde{\pi}}[A_{\pi}(s, \tilde{a})] - \mathbb{E}_{a \sim \pi} [A_{\pi}(s, a)] \quad \text{by definition of } \mathbb{E}_{a \sim \pi}[A_{\pi}(s, a)] = 0\\
+&\leq P(\tilde{a}\not=a|s)\max_{a, \tilde{a}}\left|A_{\pi}(s, \tilde{a}) -A_{\pi}(s, a)\right| \\
+&\leq 2\alpha \max_{s,a}\left|A_{\pi}(s, a)\right| \\
+\end{align*}
+$$
+
+Next, we need to figure out the bound of the difference between $\mathbb{E}_{s_t \sim \pi}[ \mathbb{E}_{a_t \sim \tilde{\pi}}[A_{\pi}(s_t, a_t)]]$ and $\mathbb{E}_{s_t \sim \tilde{\pi}}[\mathbb{E}_{a_t \sim \tilde{\pi}}[A_{\pi}(s_t, a_t)]]$. Starting from here, we denote $A(s_t)$ as $\mathbb{E}_{a_t \sim \tilde{\pi}}[A_{\pi}(s_t, a_t)]$. So the difference is $\mathbb{E}_{s_t \sim \pi}[A(s_t)] - \mathbb{E}_{s_t \sim \tilde{\pi}}[A(s_t)]$.
+
+And let $n_t$ denote the number of times $a_i$ disagrees with $\tilde{a}_i$ before time $t$. And we use can use it to estimate the chance that trajectory $\tau$ agrees with  $\tilde{\tau}$ by $P(n_t=0) = (1-\alpha)^{t}$, and the chance that $\tau$ disagrees with $\tilde{\tau}$ by $P(n_t>0) = 1 -P(n_t=0) = 1-(1-\alpha)^{t}$.
+
+Thus,
+
+$$
+\begin{align*}
+\left | \mathbb{E}_{s_t\sim\pi}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}}[A(s_t)] \right| &= \left | \mathbb{E}_{s_t\sim\pi|n_t=0}[A(s_t)] + \mathbb{E}_{s_t\sim\pi|n_t>0}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}|n_t=0}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}|n_t>0}[A(s_t)] \right| \\
+&= \left | \mathbb{E}_{s_t\sim\pi|n_t=0}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}|n_t=0}[A(s_t)] \right| + \left | \mathbb{E}_{s_t\sim\pi|n_t>0}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}|n_t>0}[A(s_t)] \right| \\
+&=\left| \mathbb{E}_{s_t\sim\pi|n_t>0}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}|n_t>0}[A(s_t)] \right|\\
+&\leq P(n_t>0) \cdot 2 \max_{s_t}\left|A(s_t) \right|\\
+&\leq (1-(1-\alpha)^t) \cdot 2 \cdot 2\alpha \max_{s,a}\left|A(s, a)\right|\\
+&= 4\alpha (1-(1-\alpha)^t) \max_{s,a}\left|A(s, a)\right|\\
+\end{align*}
+$$
+
+Now we can compute the bound of the difference between $L_{\pi}(\tilde{\pi})$ and $\eta(\tilde{\pi})$:
+
+$$
+\begin{align*}
+\sum_{t=0}^{\infty} \gamma^t \left| \mathbb{E}_{s_t\sim\pi}[A(s_t)] - \mathbb{E}_{s_t\sim\tilde{\pi}}[A(s_t)] \right| &\leq \sum_{t=0}^{\infty} \gamma^t 4\alpha (1-(1-\alpha)^t) \max_{s,a}\left|A(s, a)\right|\\
+&= 4\alpha \max_{s,a}\left|A(s, a)\right| \sum_{t=0}^{\infty} \gamma^t (1-(1-\alpha)^t)\\
+&= 4\alpha \max_{s,a}\left|A(s, a)\right| \sum_{t=0}^{\infty} \gamma^t - \gamma^t(1-\alpha)^t\\
+&= 4\alpha \max_{s,a}\left|A(s, a)\right| (\frac{1}{1-\gamma} -  \frac{1}{1-\gamma(1-\alpha)})\\
+&= \frac{4\alpha^2\gamma \max_{s,a}\left|A(s, a)\right|}{(1-\gamma)(1-\gamma(1-\alpha))}\\
+&\leq \frac{4\alpha^2\gamma}{(1-\gamma)^2} \max_{s,a}\left|A(s, a)\right|\\
+\end{align*}
+$$
+
+
+
+
+
+**Monotonic Improvement over Surrogate Objective:**
+
+  We know that $\eta({\pi_{i+1}})$ is bounded by $L_{\pi_i}(\pi_{i+1})$ with the policy improvement bound. Now, we need to show that if $L_{\pi_i}(\pi_{i+1})$ for $i > 0$ is a monotonic increasing sequence, then $\eta({\pi_{i}})$ for $i > 0$ is also a monotonic increasing sequence.
+
+  $$
+  \begin{align*}
+  \eta(\pi_{i+1}) &\geq L_{\pi_i}(\pi_{i+1}) \\
+  \eta(\pi_{i+1}) - L_{\pi_i}(\pi_{i}) &\geq L_{\pi_i}(\pi_{i+1})   - L_{\pi_i}(\pi_{i})\\
+  \eta(\pi_{i+1}) - \eta(\pi_i) &\geq L_{\pi_i}(\pi_{i+1}) - L_{\pi_i}(\pi_{i})
+  \end{align*}
+  $$
+
+  Based on this derivation, we show that  $\eta(\pi_{i+1})$ is a monotonic increasing sequence if we keep on improving the surrogate objective.
