@@ -5,9 +5,6 @@
 ### Novelty
 
 - Negative Sampling: Use the negative sampling to approximate the softmax function, which is computationally efficient.
-- Subsampling of Frequent Words: 
-
-
 
 
 ### Architecture
@@ -81,10 +78,10 @@ $$
 
 (Translate to the softmax function of the original word2vec heuristically)
 
-So, if we consider $u_o^Tv_t \text{ as } \ln P(u^+|C=1)$ and $-u_i^Tv_t \text{ as } \ln P(u_i^-|C=0)$, we have:
+So, if we consider $u_o^Tv_c \text{ as } \ln P(u^+|C=1)$ and $-u_i^Tv_c \text{ as } \ln P(u_i^-|C=0)$, we have:
 $$
 \begin{align*}
--\mathcal{L} &= \log \sigma(u_o^Tv_t) + \sum_{i=1}^{k} \mathbb{E}_{u_i^ \sim P(u^-)} \log \sigma(-u_i^Tv_t)\\
+-\mathcal{L} &= \log \sigma(u_o^Tv_c) + \sum_{i=1}^{k} \mathbb{E}_{u_i^ \sim P(u^-)} \log \sigma(-u_i^Tv_c)\\
 
 \end{align*}
 $$
